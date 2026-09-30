@@ -169,8 +169,7 @@ For example, to set both options explicitly:
 The module sends Caddy's storage operations to the local Uncloud API. Uncloud stores and replicates the data across the
 cluster. The replicated store is eventually consistent, so reads may return older data than the most recent write.
 
-To ensure that any Caddy instance reads the latest data, it uses distributed locks to coordinate certificate issuance
-and other operations. After acquiring a lock, the module waits for its local store replica to catch up with versions
-reported by responding machines before Caddy reads or writes under that lock.
-
-This still doesn't provide strong guarantees but it's sufficient for Caddy's use case.
+To ensure that any Caddy instance reads the latest data and coordinates with other instances when issuing certificates,
+it uses distributed locks. After acquiring a lock, the module waits for its local store replica to catch up with
+versions reported by responding machines before Caddy reads or writes under that lock. This still doesn't provide strong
+guarantees but it's sufficient for Caddy's use case.
