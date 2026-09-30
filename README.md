@@ -43,7 +43,7 @@ Create a `Caddyfile` with the global storage option:
 
 Deploy Caddy with the pre-built image and your global config.
 
-[!NOTE]
+> [!NOTE]
 > You need `uc` version 0.21.0 or newer to deploy using `uc caddy deploy` command. If you have an older version (`uc
 > version`), [upgrade](https://uncloud.run/docs/getting-started/install-cli/) it or use `uc deploy` with a
 > [`compose.yaml`](#composeyaml) file instead.
@@ -65,7 +65,7 @@ uc inspect caddy
 Build your own image if you need other Caddy modules or want to choose a compatible Caddy version. Create the following
 `.env`, `Dockerfile`, and `compose.yaml` in the same directory.
 
-### .env
+#### .env
 
 Set the desired upstream Caddy version in `.env`:
 
@@ -73,7 +73,7 @@ Set the desired upstream Caddy version in `.env`:
 CADDY_VERSION=2.11.4
 ```
 
-### Dockerfile
+#### Dockerfile
 
 The Dockerfile builds the chosen Caddy version with the Uncloud storage module using
 [xcaddy](https://github.com/caddyserver/xcaddy). You can add any other modules to the `xcaddy build` command. Pin module
