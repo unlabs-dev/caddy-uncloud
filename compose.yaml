@@ -1,0 +1,35 @@
+services:
+  caddy:
+    build:
+      args:
+        CADDY_VERSION: ${CADDY_VERSION}
+      # If all your cluster machines use the same architecture as your local machine, you can omit `platforms`.
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: local/caddy-uncloud:${CADDY_VERSION}-{{date "20060102-150405"}}
+    environment:
+      # unix// is not a typo. Caddy uses network/address format, not a unix:// URL.
+      CADDY_ADMIN: unix//run/caddy/admin.sock
+    healthcheck:
+      test: curl -fsS -o /dev/null --unix-socket /run/caddy/admin.sock http://localhost/config/
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
+    volumes:
+      - /var/lib/uncloud/caddy:/etc/caddy:ro
+      - /run/uncloud/api:/run/uncloud/api:ro
+      - /run/uncloud/caddy:/run/caddy
+    x-ports:
+      - 80:80@host
+      - 443:443@host
+      - 443:443/udp@host
+    x-caddy: |
+      {
+          debug
+          storage uncloud
+      }
+    deploy:
+      mode: global
