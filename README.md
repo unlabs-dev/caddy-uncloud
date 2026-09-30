@@ -127,7 +127,6 @@ services:
       }
     deploy:
       mode: global
-
 ```
 
 Keep the admin address, mounts, and host ports as shown. Uncloud combines your global config `x-caddy` with the sites it
