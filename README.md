@@ -112,6 +112,13 @@ services:
     environment:
       # unix// is not a typo. Caddy uses network/address format, not a unix:// URL.
       CADDY_ADMIN: unix//run/caddy/admin.sock
+    healthcheck:
+      test: curl -fsS -o /dev/null --unix-socket /run/caddy/admin.sock http://localhost/config/
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+      start_interval: 1s
     volumes:
       - /var/lib/uncloud/caddy:/etc/caddy:ro
       - /run/uncloud/api:/run/uncloud/api:ro
