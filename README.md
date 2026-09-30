@@ -5,6 +5,12 @@ proxy in an [Uncloud](https://github.com/psviderski/uncloud) cluster. It lets Ca
 share TLS certificates, private keys, and ACME challenge tokens through Uncloud's cluster store. It uses distributed
 locks to coordinate certificate issuance.
 
+> [!NOTE]
+> Using this module requires Uncloud version 0.21.0 or newer for both the `uc` CLI and the daemon on every cluster
+> machine. Check the CLI with `uc version` and [upgrade it](https://uncloud.run/docs/getting-started/install-cli/) if
+> needed. Check the daemon versions with `uc machine ls` and
+> [upgrade](https://github.com/psviderski/uncloud/releases/latest) older daemons before deploying Caddy.
+
 ## Why it's needed
 
 When you run multiple instances of Caddy behind a load balancer or multi-address DNS record, an ACME challenge may reach
@@ -42,11 +48,6 @@ Create a `Caddyfile` with the global storage option:
 ```
 
 Deploy Caddy with the pre-built image and your global config.
-
-> [!NOTE]
-> You need `uc` version 0.21.0 or newer to deploy using `uc caddy deploy` command. If you have an older version (`uc
-> version`), [upgrade](https://uncloud.run/docs/getting-started/install-cli/) it or use `uc deploy` with a
-> [`compose.yaml`](#composeyaml) file instead.
 
 ```shell
 uc caddy deploy --image ghcr.io/unlabs-dev/caddy-uncloud:0.1.0 --caddyfile Caddyfile
