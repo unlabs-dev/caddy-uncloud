@@ -19,8 +19,9 @@ const (
 )
 
 // Lock acquires an automatically renewed distributed lock and waits for the local store to catch up with versions
-// observed on responding machines. Writers using the same lock can then read locally. Unavailable machines may have
-// writes that this wait does not cover, and reads outside a lock remain eventually consistent.
+// observed on responding machines. A failed wait is logged but does not prevent lock acquisition.
+// Unavailable machines may have writes that this wait does not cover, and local reads may remain stale. Reads outside
+// a lock remain eventually consistent.
 func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return errors.New("lock name is empty")
@@ -78,12 +79,13 @@ func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 	waitStarted := time.Now()
 	log.Debug("waiting for local store replication", "machine_names", machines, "store_version", version)
 	waitCtx, cancelWait := context.WithTimeout(ctx, storeReplicationTimeout)
-	err = s.client.WaitForStoreVersion(waitCtx, version)
+	waitErr := s.client.WaitForStoreVersion(waitCtx, version)
 	cancelWait()
-	if err != nil {
-		return fmt.Errorf("wait for local store replication: %w", err)
+	if waitErr != nil {
+		log.Error("failed to wait for local store replication", "duration", time.Since(waitStarted), "error", waitErr)
+	} else {
+		log.Debug("local store replication complete", "duration", time.Since(waitStarted))
 	}
-	log.Debug("local store replication complete", "duration", time.Since(waitStarted))
 
 	s.locksMu.Lock()
 	defer s.locksMu.Unlock()
