@@ -83,11 +83,10 @@ versions if you want to avoid breaking changes in the future.
 ARG CADDY_VERSION
 
 FROM caddy:${CADDY_VERSION}-builder AS builder
-ARG CADDY_VERSION
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     xcaddy build \
-        --with github.com/unlabs-dev/caddy-uncloud/storage \
+        --with github.com/unlabs-dev/caddy-uncloud/storage
     # Include other Caddy modules you need here:
     #   --with github.com/caddy-dns/cloudflare@v0.2.4
 

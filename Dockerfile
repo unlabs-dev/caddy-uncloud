@@ -4,7 +4,6 @@ FROM caddy:${CADDY_VERSION}-builder AS builder
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     xcaddy build \
-    # TODO: pin the version of storage when released.
         --with github.com/unlabs-dev/caddy-uncloud/storage \
         --with github.com/mholt/caddy-l4@v0.1.2 \
         --with github.com/caddy-dns/cloudflare@v0.2.4 \
