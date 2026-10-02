@@ -50,7 +50,7 @@ Create a `Caddyfile` with the global storage option:
 Deploy Caddy with the pre-built image and your global config.
 
 ```shell
-uc caddy deploy --image ghcr.io/unlabs-dev/caddy-uncloud:0.1.0 --caddyfile Caddyfile
+uc caddy deploy --image ghcr.io/unlabs-dev/caddy-uncloud:0.1.2 --caddyfile Caddyfile
 ```
 
 Uncloud combines your global config with the sites it generates for published services. Check the resulting Caddyfile
