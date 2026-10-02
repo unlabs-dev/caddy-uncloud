@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/caddyserver/caddy/v2 v2.11.4
 	github.com/caddyserver/certmagic v0.25.4
-	github.com/psviderski/uncloud v0.20.1-0.20260930064346-4dae187aa577
+	github.com/psviderski/uncloud v0.21.0
 	google.golang.org/grpc v1.81.0
 )
 

@@ -395,8 +395,8 @@ github.com/prometheus/procfs v0.0.2/go.mod h1:TjEm7ze935MbeOT/UhFTIMYKhuLP4wbCsT
 github.com/prometheus/procfs v0.0.3/go.mod h1:4A/X28fw3Fc593LaREMrKMqOKvUAntwMDaekg4FpcdQ=
 github.com/prometheus/procfs v0.22.0 h1:6q9+/JL9IKAPbCmBrv9n5O5Ty3NKnciV5X7YGw0oics=
 github.com/prometheus/procfs v0.22.0/go.mod h1:CvmFr/GVhIjIvWJZW3tgkODBQMRIf0EyWMQLHCHab58=
-github.com/psviderski/uncloud v0.20.1-0.20260930064346-4dae187aa577 h1:ElWjBdU40aFKY9mEi2+90ELsfM6QOt1+tVsHAcGkSQY=
-github.com/psviderski/uncloud v0.20.1-0.20260930064346-4dae187aa577/go.mod h1:jdLmP2SqUlgrdSswj4kunp/vMvO5c3rNWXLRUlxGFrM=
+github.com/psviderski/uncloud v0.21.0 h1:zneYyykqbwn6Ccdv3a1pgkBmnMQ/mZAjhET+lJ9IYNM=
+github.com/psviderski/uncloud v0.21.0/go.mod h1:jdLmP2SqUlgrdSswj4kunp/vMvO5c3rNWXLRUlxGFrM=
 github.com/psviderski/unregistry v0.4.1 h1:KedQTjyj8hHbzygK9uw5YS10amMZ5cjSYHqSjUUBhoE=
 github.com/psviderski/unregistry v0.4.1/go.mod h1:DXLnzrskO5NuRlzZhpbyo1E6KpirnctUvq6WtCGkpUQ=
 github.com/quic-go/go-ossfuzz-seeds v0.1.0 h1:APacT+iIaNF6fd8AGEiN3bT/Jtkd2jz4v4TzM7MFjy0=
