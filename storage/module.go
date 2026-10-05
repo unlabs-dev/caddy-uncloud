@@ -19,8 +19,6 @@ import (
 )
 
 const (
-	// ModuleID is the Caddy module ID for Uncloud storage.
-	ModuleID = "caddy.storage.uncloud"
 	// DefaultSocketPath is the default path to the Uncloud API socket.
 	DefaultSocketPath = "/run/uncloud/api/uncloud.sock"
 	// DefaultLockTTL is the default duration of a distributed lock lease.
@@ -64,7 +62,7 @@ type Storage struct {
 // CaddyModule returns the Caddy module information.
 func (*Storage) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
-		ID:  ModuleID,
+		ID:  "caddy.storage.uncloud",
 		New: func() caddy.Module { return new(Storage) },
 	}
 }
