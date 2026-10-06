@@ -4,24 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
-	"slices"
 	"time"
 
-	"github.com/psviderski/uncloud/pkg/api"
-	"github.com/psviderski/uncloud/pkg/client"
 	"github.com/psviderski/uncloud/pkg/distlock"
 )
 
-const (
-	lockPrefix              = "caddy_storage:"
-	storeReplicationTimeout = 10 * time.Second
-)
+const lockPrefix = "caddy_storage:"
 
-// Lock acquires an automatically renewed distributed lock and waits for the local store to catch up with versions
-// observed on responding machines. A failed wait is logged but does not prevent lock acquisition.
-// Unavailable machines may have writes that this wait does not cover, and local reads may remain stale. Reads outside
-// a lock remain eventually consistent.
+// Lock acquires an automatically renewed distributed lock.
 func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 	if name == "" {
 		return errors.New("lock name is empty")
@@ -59,6 +49,7 @@ func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 		return fmt.Errorf("acquire lock '%s': %w", name, err)
 	}
 	log.Debug("lock lease acquired", "duration", time.Since(started))
+
 	// Release the lease if the lock acquisition fails after this point.
 	// Unlock will take care of releasing the lease on success.
 	defer func() {
@@ -70,31 +61,8 @@ func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 		}
 	}()
 
-	// Catch up with the latest store versions observed on responding machines to increase the chance of reading
-	// the latest writes on them locally.
-	version, machines, err := s.clusterStoreVersion(ctx, log)
-	if err != nil {
-		return err
-	}
-	waitStarted := time.Now()
-	log.Debug("waiting for local store replication", "machine_names", machines, "store_version", version)
-	waitCtx, cancelWait := context.WithTimeout(ctx, storeReplicationTimeout)
-	waitErr := s.client.WaitForStoreVersion(waitCtx, version)
-	cancelWait()
-	if waitErr != nil {
-		log.Error("failed to wait for local store replication", "duration", time.Since(waitStarted), "error", waitErr)
-	} else {
-		log.Debug("local store replication complete", "duration", time.Since(waitStarted))
-	}
-
 	s.locksMu.Lock()
 	defer s.locksMu.Unlock()
-	if s.ctx.Err() != nil {
-		return errors.New("storage is closed")
-	}
-	if lost := context.Cause(lease.Context()); lost != nil {
-		return lost
-	}
 	if _, exists := s.locks[name]; exists {
 		return errors.New("lock is already tracked by this storage instance")
 	}
@@ -102,30 +70,6 @@ func (s *Storage) Lock(ctx context.Context, name string) (err error) {
 
 	log.Debug("lock acquired", "duration", time.Since(started))
 	return nil
-}
-
-// clusterStoreVersion returns the per-actor maximum store versions from responding machines and their names.
-func (s *Storage) clusterStoreVersion(ctx context.Context, log *slog.Logger) (api.StoreVersion, []string, error) {
-	ctx, cancel := context.WithTimeout(ctx, distlock.DefaultMaxNodeCallTimeout)
-	defer cancel()
-	resp, err := s.client.MachineClient.InspectMachine(client.ProxyMachinesContext(ctx, nil), nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("inspect machines for store versions: %w", err)
-	}
-
-	maxVersion := make(api.StoreVersion)
-	machines := make([]string, 0, len(resp.Machines))
-	for _, m := range resp.Machines {
-		if m.Metadata.Error != "" {
-			log.Warn("skipping machine when collecting store versions",
-				"id", m.Metadata.MachineId, "name", m.Metadata.MachineName, "error", m.Metadata.Error)
-			continue
-		}
-		machines = append(machines, m.Metadata.MachineName)
-		maxVersion.MergeMax(m.StoreVersion)
-	}
-	slices.Sort(machines)
-	return maxVersion, machines, nil
 }
 
 // Unlock releases a previously acquired distributed lock.

@@ -2,8 +2,9 @@
 
 This is a [Caddy storage module](https://caddyserver.com/docs/caddyfile/options#storage) for Caddy running as a reverse
 proxy in an [Uncloud](https://github.com/psviderski/uncloud) cluster. It lets Caddy instances on different machines
-share TLS certificates, private keys, and ACME challenge tokens through Uncloud's cluster store. It uses distributed
-locks to coordinate certificate issuance.
+share TLS certificates, private keys, and ACME challenge tokens through Uncloud's cluster store. It uses
+[distributed locks](https://github.com/psviderski/uncloud/blob/main/pkg/distlock/doc.go) to coordinate certificate
+issuance.
 
 > [!NOTE]
 > Using this module requires Uncloud version 0.21.0 or newer for both the `uc` CLI and the daemon on every cluster
@@ -174,9 +175,19 @@ For example, to set both options explicitly:
 ## How storage works
 
 The module sends Caddy's storage operations to the local Uncloud API. Uncloud stores and replicates the data across the
-cluster. The replicated store is eventually consistent, so reads may return older data than the most recent write.
+cluster using [Corrosion](https://github.com/superfly/corrosion). The replicated store is eventually consistent, so
+reads may return older data than the most recent write.
 
-To ensure that any Caddy instance reads the latest data and coordinates with other instances when issuing certificates,
-it uses distributed locks. After acquiring a lock, the module waits for its local store replica to catch up with
-versions reported by responding machines before Caddy reads or writes under that lock. This still doesn't provide strong
-guarantees but it's sufficient for Caddy's use case.
+To ensure that any Caddy instance reads the latest data, it makes a best-effort attempt to catch up with the cluster for
+each read operation. It broadcasts a request for store versions, skips failed machine responses, and waits for the local
+replica to reach the versions reported by responding machines. If version collection or replication waiting fails, the
+module logs a warning and still proceeds with the local read.
+
+Waiting normally makes the captured data available locally, but it does not guarantee an exact snapshot or cover writes
+on unavailable machines.
+
+The module uses [distributed locks](https://github.com/psviderski/uncloud/blob/main/pkg/distlock/doc.go) to coordinate
+concurrent certificate issuance. When a Caddy instance needs to issue a certificate, it first acquires a lock for the
+domain. If another instance already holds the lock, it waits until the lock is released. The lock is automatically
+renewed while held, and it expires after the configured `lock_ttl` if the holder fails to renew it. This prevents
+multiple instances from issuing the same certificate at the same time.
