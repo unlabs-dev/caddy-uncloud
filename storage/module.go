@@ -46,7 +46,7 @@ func init() {
 // [README](https://github.com/unlabs-dev/caddy-uncloud#usage) in the repo for installation and deployment instructions.
 type Storage struct {
 	// Socket is the path to the Uncloud API socket.
-	// Defaults to /run/uncloud/api/uncloud.sock when not set.
+	// Defaults to `/run/uncloud/api/uncloud.sock` when not set.
 	Socket string `json:"socket,omitempty"`
 	// LockTTL is the duration of a distributed lock after which it expires if not renewed. Locks renew automatically
 	// until unlocked. If an instance crashes or cannot renew, expiry allows another instance to acquire the stale lock.
