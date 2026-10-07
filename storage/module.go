@@ -32,7 +32,18 @@ func init() {
 	caddy.RegisterModule(new(Storage))
 }
 
-// Storage implements a Caddy storage backend that uses an Uncloud cluster to store assets such as TLS certificates.
+// Storage shares TLS certificates, private keys, and ACME challenge tokens between Caddy instances in an
+// [Uncloud](https://uncloud.run) cluster. Uncloud is a lightweight container orchestration tool for deploying
+// applications across your own servers without cluster-management overhead.
+//
+// When multiple Caddy instances serve the same domains, an ACME validation request may reach a different instance
+// from the one obtaining the certificate. Shared storage lets that instance read the challenge token and answer
+// the request. Once a certificate is obtained, the other instances can use it too. Distributed locks coordinate
+// certificate issuance and renewal across instances.
+//
+// The module uses Uncloud's built-in replicated cluster store, so no separate database or storage service is needed.
+// It requires Uncloud 0.21.0 or newer and access to the local Uncloud API Unix socket. See the
+// [README](https://github.com/unlabs-dev/caddy-uncloud#usage) in the repo for installation and deployment instructions.
 type Storage struct {
 	// Socket is the path to the Uncloud API socket.
 	// Defaults to /run/uncloud/api/uncloud.sock when not set.
